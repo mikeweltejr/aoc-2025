@@ -89,6 +89,54 @@ func calculateRollOfPaperAccess(points map[Point]string) {
 	fmt.Println(sum)
 }
 
+func removeRollsOfPaper(removedRolls int, points map[Point]string) {
+	totalRemoved := removedRolls
+
+	for p, val := range points {
+		if val != "@" {
+			continue
+		}
+
+		rollCount := 0
+
+		if checkPoint(p.X-1, p.Y, points) {
+			rollCount++
+		}
+		if checkPoint(p.X+1, p.Y, points) {
+			rollCount++
+		}
+		if checkPoint(p.X, p.Y-1, points) {
+			rollCount++
+		}
+		if checkPoint(p.X, p.Y+1, points) {
+			rollCount++
+		}
+		if checkPoint(p.X-1, p.Y-1, points) {
+			rollCount++
+		}
+		if checkPoint(p.X+1, p.Y-1, points) {
+			rollCount++
+		}
+		if checkPoint(p.X-1, p.Y+1, points) {
+			rollCount++
+		}
+		if checkPoint(p.X+1, p.Y+1, points) {
+			rollCount++
+		}
+
+		if rollCount < 4 {
+			points[Point{X: p.X, Y: p.Y}] = "x"
+			removedRolls++
+		}
+	}
+
+	if totalRemoved != removedRolls {
+		removeRollsOfPaper(removedRolls, points)
+	} else {
+		fmt.Println(totalRemoved)
+	}
+}
+
 func checkPoint(x int, y int, points map[Point]string) bool {
 	p, exists := points[Point{X: x, Y: y}]
 	return exists && p == "@"
@@ -97,4 +145,5 @@ func checkPoint(x int, y int, points map[Point]string) bool {
 func main() {
 	pointMap := convertInputToPoints()
 	calculateRollOfPaperAccess(pointMap)
+	removeRollsOfPaper(0, pointMap)
 }
