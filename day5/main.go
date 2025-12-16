@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -69,8 +70,7 @@ func inAnyRange(x int64, ranges []Range) bool {
 	return false
 }
 
-func calculateAvailableFreshIngredients() {
-	freshIngredientRanges, availableIngredients, _ := readFileInput("input.txt")
+func calculateAvailableFreshIngredients(freshIngredientRanges []string, availableIngredients []string) {
 	ranges := parseRanges(freshIngredientRanges)
 
 	sum := 0
@@ -85,6 +85,48 @@ func calculateAvailableFreshIngredients() {
 	fmt.Println(sum)
 }
 
+func mergeRanges(ranges []Range) []Range {
+	sort.Slice(ranges, func(i, j int) bool {
+		if ranges[i].Start == ranges[j].Start {
+			return ranges[i].End < ranges[j].End
+		}
+		return ranges[i].Start < ranges[j].Start
+	})
+
+	merged := make([]Range, 0, len(ranges))
+	cur := ranges[0]
+
+	for _, r := range ranges[1:] {
+		if r.Start <= cur.End+1 {
+			if r.End > cur.End {
+				cur.End = r.End
+			}
+		} else {
+			merged = append(merged, cur)
+			cur = r
+		}
+	}
+	merged = append(merged, cur)
+
+	return merged
+}
+
+func calculateAllFreshIngredients(freshIngredientRanges []string) {
+	ranges := parseRanges(freshIngredientRanges)
+	ranges = mergeRanges(ranges)
+
+	var sum int64
+	for i := 0; i < len(ranges); i++ {
+		r := ranges[i]
+
+		sum += (r.End - r.Start) + 1
+	}
+
+	fmt.Println(sum)
+}
+
 func main() {
-	calculateAvailableFreshIngredients()
+	freshIngredientRanges, availableIngredients, _ := readFileInput("input.txt")
+	calculateAvailableFreshIngredients(freshIngredientRanges, availableIngredients)
+	calculateAllFreshIngredients(freshIngredientRanges)
 }
